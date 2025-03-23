@@ -417,7 +417,9 @@ int dwc3_send_gadget_ep_cmd(struct dwc3_ep *dep, unsigned cmd,
 	dwc3_writel(dep->regs, DWC3_DEPCMDPAR0, params->param0);
 	dwc3_writel(dep->regs, DWC3_DEPCMDPAR1, params->param1);
 	dwc3_writel(dep->regs, DWC3_DEPCMDPAR2, params->param2);
-
+#ifdef OPLUS_FEATURE_CHG_BASIC
+	mb();
+#endif
 	/*
 	 * Synopsys Databook 2.60a states in section 6.3.2.5.6 of that if we're
 	 * not relying on XferNotReady, we can make use of a special "No
@@ -440,6 +442,16 @@ int dwc3_send_gadget_ep_cmd(struct dwc3_ep *dep, unsigned cmd,
 		cmd |= DWC3_DEPCMD_CMDACT;
 
 	dwc3_writel(dep->regs, DWC3_DEPCMD, cmd);
+
+#ifdef OPLUS_FEATURE_CHG_BASIC
+	dbg_log_string("DEP_NUM: %d :: DEPCMD=0x%08x | DWC3_DEPCMDPAR 0|1|2 = 0x%08x | 0x%08x | 0x%08x |%x |%x |%x",
+	dep->number,dwc3_readl(dep->regs, DWC3_DEPCMD),
+	dwc3_readl(dep->regs, DWC3_DEPCMDPAR0),
+	dwc3_readl(dep->regs, DWC3_DEPCMDPAR1),
+	dwc3_readl(dep->regs, DWC3_DEPCMDPAR2),
+	params->param0, params->param1, params->param2);
+#endif
+
 	do {
 		reg = dwc3_readl(dep->regs, DWC3_DEPCMD);
 		if (!(reg & DWC3_DEPCMD_CMDACT)) {
@@ -4560,7 +4572,11 @@ int dwc3_gadget_init(struct dwc3 *dwc)
 	dwc->gadget.speed		= USB_SPEED_UNKNOWN;
 	dwc->gadget.sg_supported	= true;
 	dwc->gadget.name		= "dwc3-gadget";
+#ifdef OPLUS_FEATURE_CHG_BASIC
+	//dwc->gadget.lpm_capable		= true;
+#else
 	dwc->gadget.lpm_capable		= !dwc->usb2_gadget_lpm_disable;
+#endif
 
 	/*
 	 * FIXME We might be setting max_speed to <SUPER, however versions
