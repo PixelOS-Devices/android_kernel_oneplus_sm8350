@@ -620,6 +620,12 @@
 	qcom,normal_vfloat_over_sw_limit = <4465>;
 	qcom,warm_vfloat_over_sw_limit = <4140>;
 
+	oplus,support_hot_enter_kpoc;
+	oplus,poweroff_high_batt_temp = <720>;
+	oplus,poweroff_emergency_batt_temp = <770>;
+	oplus,usbtemp_batt_temp_over_hot = <60>;
+	oplus,usbtemp_temp_gap_with_batt_temp_in_over_hot = <15>;
+
 	oplus,quick_mode_gain_support;
 	qcom,support_usbtemp_protect_v2;
 	qcom,usbtemp_batt_temp_low = <50>;
