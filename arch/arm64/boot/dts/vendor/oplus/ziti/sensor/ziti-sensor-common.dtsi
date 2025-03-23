@@ -74,7 +74,7 @@
 			sensor-type = <4>;//OPLUS_PROXIMITY
 			bus-number = <2>;
 			irq-number = <142>;
-			ps-type = <2>;
+			ps-type = <1>;
 			low_step = <300>;
 			high_step = <400>;
 			low_limit = <600>;

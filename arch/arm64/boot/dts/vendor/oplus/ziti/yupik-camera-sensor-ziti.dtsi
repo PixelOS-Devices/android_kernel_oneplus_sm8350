@@ -180,6 +180,7 @@
 		compatible = "qcom,camera-flash";
 		qcom,flash-name = "pmic";
 		qcom,flash-current = <110>;
+		qcom,flash-level-current = <40 60 80 110>;
 		flash-source = <&pm8350c_flash0 &pm8350c_flash1>;
 		torch-source = <&pm8350c_torch0 &pm8350c_torch1>;
 		switch-source = <&pm8350c_switch2>;
@@ -191,6 +192,7 @@
 		compatible = "qcom,camera-flash";
 		qcom,flash-name = "pmic";
 		qcom,flash-current = <110>;
+		qcom,flash-level-current = <40 60 80 110>;
 		flash-source = <&pm8350c_flash0 &pm8350c_flash1>;
 		torch-source = <&pm8350c_torch0 &pm8350c_torch1>;
 		switch-source = <&pm8350c_switch2>;
@@ -202,6 +204,7 @@
 		compatible = "qcom,camera-flash";
 		qcom,flash-name = "pmic";
 		qcom,flash-current = <110>;
+		qcom,flash-level-current = <40 60 80 110>;
 		flash-source = <&pm8350c_flash0 &pm8350c_flash1>;
 		torch-source = <&pm8350c_torch0 &pm8350c_torch1>;
 		switch-source = <&pm8350c_switch2>;
@@ -540,4 +543,20 @@
 
 &i2c_freq_1Mhz_cci0 {
 	hw-scl-stretch-en = <1>;
+};
+
+&pm8350c_torch0 {
+    qcom,ires-ua = <5000>;
+};
+
+&pm8350c_torch1 {
+    qcom,ires-ua = <5000>;
+};
+
+&pm8350c_torch2 {
+    qcom,ires-ua = <5000>;
+};
+
+&pm8350c_torch3 {
+    qcom,ires-ua = <5000>;
 };
