@@ -21,7 +21,11 @@ source "drivers/soc/ux500/Kconfig"
 source "drivers/soc/versatile/Kconfig"
 source "drivers/soc/xilinx/Kconfig"
 source "drivers/soc/zte/Kconfig"
+
+#ifdef OPLUS_FEATURE_STORAGE_IO_METRICS
 source "drivers/soc/oplus/storage/Kconfig"
+#endif /*OPLUS_FEATURE_STORAGE_IO_METRICS*/
+
 #ifdef OPLUS_FEATURE_POWERINFO_STANDBY
 source "drivers/soc/oplus/oplus_wakelock/Kconfig"
 #endif /* OPLUS_FEATURE_POWERINFO_STANDBY */
