@@ -31,6 +31,7 @@
 #include <linux/of.h>
 #include <asm/current.h>
 #include <linux/timer.h>
+#include <linux/string.h>
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/trace_msm_ssr_event.h>
@@ -622,6 +623,9 @@ static void notify_each_subsys_device(struct subsys_device **list,
 		notif_data.enable_mini_ramdumps = enable_mini_ramdumps;
 		notif_data.no_auth = dev->desc->no_auth;
 		notif_data.pdev = pdev;
+#if defined(CONFIG_QGKI) && defined(OPLUS_BUG_STABILITY)
+		notif_data.debug = 0xaa55aa55;
+#endif
 
 		trace_pil_notif("before_send_notif", notif, dev->desc->fw_name);
 		setup_timeout(dev->desc, NULL, SUBSYS_TO_HLOS);
@@ -632,10 +636,23 @@ static void notify_each_subsys_device(struct subsys_device **list,
 	}
 }
 
+#ifdef OPLUS_FEATURE_CHG_BASIC
+#if IS_BUILTIN(CONFIG_OPLUS_CHG)
+extern void oplus_turn_off_power_when_adsp_crash(void);
+#endif
+#endif
 static int subsystem_shutdown(struct subsys_device *dev, void *data)
 {
 	const char *name = dev->desc->name;
 	int ret;
+
+#ifdef OPLUS_FEATURE_CHG_BASIC
+#if IS_BUILTIN(CONFIG_OPLUS_CHG)
+	if (!strcmp(name, "adsp")) {
+		oplus_turn_off_power_when_adsp_crash();
+	}
+#endif
+#endif
 
 	pr_info("[%s:%d]: Shutting down %s\n",
 			current->comm, current->pid, name);
@@ -925,6 +942,11 @@ err_out:
 }
 EXPORT_SYMBOL(subsystem_put);
 
+#ifdef OPLUS_FEATURE_CHG_BASIC
+#if IS_BUILTIN(CONFIG_OPLUS_CHG)
+extern void oplus_adsp_crash_recover_work(void);
+#endif
+#endif
 static void subsystem_restart_wq_func(struct work_struct *work)
 {
 	struct subsys_device *dev = container_of(work,
@@ -1005,7 +1027,11 @@ static void subsystem_restart_wq_func(struct work_struct *work)
 	if (ret)
 		goto err;
 	notify_each_subsys_device(list, count, SUBSYS_AFTER_POWERUP, NULL);
-
+#ifdef OPLUS_FEATURE_CHG_BASIC
+#if IS_BUILTIN(CONFIG_OPLUS_CHG)
+	oplus_adsp_crash_recover_work();
+#endif
+#endif
 	pr_info("[%s:%d]: Restart sequence for %s completed.\n",
 			current->comm, current->pid, desc->name);
 
@@ -1462,6 +1488,13 @@ struct subsys_device *subsys_register(struct subsys_desc *desc)
 	subsys->dev.bus = &subsys_bus_type;
 	subsys->dev.release = subsys_device_release;
 	subsys->notif_state = -1;
+#if IS_ENABLED(CONFIG_OPLUS_BUG_STABILITY_EFFECTON_QGKI)
+	#ifndef CONFIG_OPLUS_DAILY_BUILD
+		#ifndef CONFIG_OPLUS_SPECIAL_BUILD
+		subsys->restart_level = RESET_SUBSYS_COUPLED;
+		#endif
+	#endif
+#endif
 	subsys->desc->sysmon_pid = -1;
 	subsys->desc->state = NULL;
 	strlcpy(subsys->desc->fw_name, desc->name,

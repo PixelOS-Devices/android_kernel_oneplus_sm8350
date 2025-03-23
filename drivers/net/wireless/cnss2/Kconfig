@@ -70,6 +70,21 @@ config CNSS_QCA6390
 	  These changes are needed to support the new hardware architecture
 	  for CNSS QCA6390 chipset.
 
+config OPLUS_FEATURE_WIFI_BDF
+	bool "Modify for: multi projects using different bdf"
+	depends on CNSS2
+	help
+	  Modify for: multi projects using different bdf.
+
+config OPLUS_FEATURE_WIFI_MAC
+	bool "Modify for: load mac address from nv"
+	depends on CNSS2
+	help
+          This enables the changes from WLAN host driver that load mac address
+          from nv.
+	  These changes are needed to support the new hardware architecture
+	  for CNSS QCA6851 chipset.
+
 config CNSS_EMULATION
 	bool "Enable specific changes for emulation hardware"
 	depends on CNSS2
