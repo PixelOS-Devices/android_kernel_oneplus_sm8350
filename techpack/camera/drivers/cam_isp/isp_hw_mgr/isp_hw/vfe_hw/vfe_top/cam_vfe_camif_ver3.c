@@ -63,6 +63,7 @@ struct cam_vfe_mux_camif_ver3_data {
 	struct timeval                     epoch_ts;
 	struct timeval                     eof_ts;
 	struct timeval                     error_ts;
+	bool                               trigger_control;
 };
 
 static int cam_vfe_camif_ver3_get_evt_payload(
@@ -468,8 +469,8 @@ static int cam_vfe_camif_ver3_resource_start(
 				rsrc_data->reg_data->dual_ife_sync_sel_shift);
 	}
 
-	CAM_DBG(CAM_ISP, "VFE:%d TOP core_cfg: 0x%X",
-		camif_res->hw_intf->hw_idx, val);
+	CAM_INFO(CAM_ISP, "VFE:%d TOP core_cfg: 0x%X trigger_control:%d",
+			camif_res->hw_intf->hw_idx, val, rsrc_data->trigger_control);
 
 	cam_io_w_mb(val, rsrc_data->mem_base +
 		rsrc_data->common_reg->core_cfg_0);
@@ -479,13 +480,29 @@ static int cam_vfe_camif_ver3_resource_start(
 	case CAM_CPAS_TITAN_480_V100:
 	case CAM_CPAS_TITAN_580_V100:
 	case CAM_CPAS_TITAN_570_V200:
-		epoch0_line_cfg = ((rsrc_data->last_line +
+		if (rsrc_data->trigger_control) {
+			epoch0_line_cfg = ((rsrc_data->last_line +
+			rsrc_data->vbi_value) -
+			rsrc_data->first_line) / 8;
+			if ((epoch0_line_cfg * 4) >
+				(rsrc_data->last_line - rsrc_data->first_line))
+				epoch0_line_cfg = (rsrc_data->last_line -
+				rsrc_data->first_line)/4;
+
+			CAM_INFO(CAM_ISP, "TRIGGER CONTROL VFE:%d TOP epoch0_line_cfg: 0x%x",
+					camif_res->hw_intf->hw_idx, epoch0_line_cfg);
+		} else {
+			epoch0_line_cfg = ((rsrc_data->last_line +
 			rsrc_data->vbi_value) -
 			rsrc_data->first_line) / 4;
-		if ((epoch0_line_cfg * 2) >
-			(rsrc_data->last_line - rsrc_data->first_line))
-			epoch0_line_cfg = (rsrc_data->last_line -
+			if ((epoch0_line_cfg * 2) >
+				(rsrc_data->last_line - rsrc_data->first_line))
+				epoch0_line_cfg = (rsrc_data->last_line -
 				rsrc_data->first_line)/2;
+				CAM_INFO(CAM_ISP, "NON TRIGGER CONTROL VFE:%d TOP epoch0_line_cfg: 0x%x",
+					camif_res->hw_intf->hw_idx, epoch0_line_cfg);
+		}
+
 	/* epoch line cfg will still be configured at midpoint of the
 	 * frame width. We use '/ 4' instead of '/ 2'
 	 * cause it is multipixel path
@@ -889,6 +906,14 @@ static int cam_vfe_camif_ver3_process_cmd(
 		break;
 	case CAM_ISP_HW_CMD_BLANKING_UPDATE:
 		rc = cam_vfe_camif_ver3_blanking_update(rsrc_node, cmd_args);
+		break;
+	case CAM_ISP_HW_CMD_TRIGGER_CONROL:
+		camif_priv = (struct cam_vfe_mux_camif_ver3_data *)
+		rsrc_node->res_priv;
+		camif_priv->trigger_control = *((bool *)cmd_args);
+		CAM_INFO(CAM_ISP,"hw_idx:%d Trigger control:%d",
+				camif_priv->hw_intf->hw_idx,
+				camif_priv->trigger_control);
 		break;
 	default:
 		CAM_ERR(CAM_ISP,
@@ -1488,6 +1513,8 @@ static int cam_vfe_camif_ver3_handle_irq_bottom_half(void *handler_priv,
 			payload->ts.mono_time.tv_sec;
 		camif_priv->epoch_ts.tv_usec =
 			payload->ts.mono_time.tv_usec;
+
+		cam_cpas_notify_event("IFE EPOCH", evt_info.hw_idx);
 
 		if (camif_priv->event_cb)
 			camif_priv->event_cb(camif_priv->priv,
