@@ -56,6 +56,7 @@ struct cam_vfe_mux_camif_data {
 	struct timeval                     epoch_ts;
 	struct timeval                     eof_ts;
 	struct timeval                     error_ts;
+	bool                               trigger_control;
 };
 
 static int cam_vfe_camif_get_evt_payload(
@@ -405,8 +406,8 @@ static int cam_vfe_camif_resource_start(
 
 	cam_io_w_mb(val, rsrc_data->mem_base + rsrc_data->common_reg->core_cfg);
 
-	CAM_DBG(CAM_ISP, "hw id:%d core_cfg val:%d", camif_res->hw_intf->hw_idx,
-		val);
+	CAM_INFO(CAM_ISP, "hw id:%d core_cfg val:%d trigger_control:%d", camif_res->hw_intf->hw_idx,
+			val, rsrc_data->trigger_control);
 
 	/* disable the CGC for stats */
 	cam_io_w_mb(0xFFFFFFFF, rsrc_data->mem_base +
@@ -424,13 +425,40 @@ static int cam_vfe_camif_resource_start(
 				rsrc_data->camif_reg->epoch_irq);
 		break;
 	default:
-		epoch0_irq_mask = (((rsrc_data->last_line +
+		if (rsrc_data->trigger_control) {
+			epoch0_irq_mask = (((rsrc_data->last_line +
+			rsrc_data->vbi_value) -
+			rsrc_data->first_line) / 4);
+			if ((epoch0_irq_mask * 2) >
+				(rsrc_data->last_line - rsrc_data->first_line))
+				epoch0_irq_mask = rsrc_data->last_line -
+				rsrc_data->first_line;
+				CAM_INFO(CAM_ISP, "Trigger enable epoch0_irq_mask:0x%x  first_line: %u\n"
+						"last_line: %u vbi: %u\n"
+						"epoch0_irq_mask: 0x%x",
+						epoch0_irq_mask,
+						rsrc_data->first_line,
+						rsrc_data->last_line,
+						rsrc_data->vbi_value,
+						epoch0_irq_mask);
+		} else {
+			epoch0_irq_mask = (((rsrc_data->last_line +
 				rsrc_data->vbi_value) -
 				rsrc_data->first_line) / 2);
-		if ((epoch0_irq_mask) >
-			(rsrc_data->last_line - rsrc_data->first_line))
-			epoch0_irq_mask = rsrc_data->last_line -
+			if ((epoch0_irq_mask) >
+				(rsrc_data->last_line - rsrc_data->first_line))
+				epoch0_irq_mask = rsrc_data->last_line -
 				rsrc_data->first_line;
+				CAM_INFO(CAM_ISP, "Trigger disable epoch0_irq_mask:0x%x first_line: %u\n"
+						"last_line: %u vbi: %u\n"
+						"epoch0_irq_mask: 0x%x",
+						epoch0_irq_mask,
+						rsrc_data->first_line,
+						rsrc_data->last_line,
+						rsrc_data->vbi_value,
+						epoch0_irq_mask);
+		}
+
 
 		epoch1_irq_mask = rsrc_data->reg_data->epoch_line_cfg &
 				0xFFFF;
@@ -439,7 +467,7 @@ static int cam_vfe_camif_resource_start(
 		cam_io_w_mb(computed_epoch_line_cfg,
 				rsrc_data->mem_base +
 				rsrc_data->camif_reg->epoch_irq);
-		CAM_DBG(CAM_ISP, "first_line: %u\n"
+		CAM_INFO(CAM_ISP, "first_line: %u\n"
 				"last_line: %u vbi: %u\n"
 				"epoch_line_cfg: 0x%x",
 				rsrc_data->first_line,
@@ -702,6 +730,14 @@ static int cam_vfe_camif_process_cmd(struct cam_isp_resource_node *rsrc_node,
 			rsrc_node->res_priv;
 		*((struct cam_hw_soc_info **)cmd_args) = camif_priv->soc_info;
 		rc = 0;
+		break;
+	case CAM_ISP_HW_CMD_TRIGGER_CONROL:
+		camif_priv = (struct cam_vfe_mux_camif_data *)
+		rsrc_node->res_priv;
+		camif_priv->trigger_control = *((bool *)cmd_args);
+		CAM_INFO(CAM_ISP,"hw_idx:%d Trigger control:%d",
+				camif_priv->hw_intf->hw_idx,
+				camif_priv->trigger_control);
 		break;
 	default:
 		CAM_ERR(CAM_ISP,
