@@ -320,6 +320,7 @@ struct cam_req_mgr_device_info {
  * @max_delay       : max pipeline delay on this link
  * @crm_cb          : callback funcs to communicate with req mgr
  * @trigger_id      : Unique ID provided to the triggering device
+ * @trigger_control : Trigger control for dev
  */
 struct cam_req_mgr_core_dev_link_setup {
 	int32_t                    link_enable;
@@ -328,6 +329,7 @@ struct cam_req_mgr_core_dev_link_setup {
 	enum cam_pipeline_delay    max_delay;
 	struct cam_req_mgr_crm_cb *crm_cb;
 	int32_t                    trigger_id;
+	bool                       trigger_control;
 };
 
 /**

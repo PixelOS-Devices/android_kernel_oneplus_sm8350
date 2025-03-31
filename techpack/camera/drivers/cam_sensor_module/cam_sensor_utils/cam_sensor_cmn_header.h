@@ -143,6 +143,15 @@ enum msm_camera_power_seq_type {
 	SENSOR_CUSTOM_GPIO1,
 	SENSOR_CUSTOM_GPIO2,
 	SENSOR_VANA1,
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	SENSOR_EXT_L1,
+	SENSOR_EXT_L2,
+	SENSOR_EXT_L3,
+	SENSOR_EXT_L4,
+	SENSOR_EXT_L5,
+	SENSOR_EXT_L6,
+	SENSOR_EXT_L7,
+#endif
 	SENSOR_SEQ_TYPE_MAX,
 };
 
@@ -327,7 +336,22 @@ struct cam_camera_slave_info {
 	uint16_t sensor_id_reg_addr;
 	uint16_t sensor_id;
 	uint16_t sensor_id_mask;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+        uint8_t  addr_type;
+        uint8_t  data_type;
+#endif
 };
+
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+struct cam_camera_id_info {
+	uint16_t sensor_slave_addr;
+	uint16_t sensor_id_mask;
+	uint32_t sensor_id_reg_addr;
+	uint32_t sensor_id;
+	uint8_t sensor_addr_type;
+	uint8_t sensor_data_type;
+};
+#endif
 
 struct msm_sensor_init_params {
 	int modes_supported;
@@ -376,6 +400,9 @@ struct cam_sensor_power_setting {
 
 struct cam_sensor_board_info {
 	struct cam_camera_slave_info slave_info;
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+        struct cam_camera_id_info id_info;
+#endif
 	int32_t sensor_mount_angle;
 	int32_t secure_mode;
 	int modes_supported;

@@ -29,8 +29,10 @@
 #include "cam_common_util.h"
 #include "cam_compat.h"
 #include "cam_cpas_hw.h"
-
-#define CAM_REQ_MGR_EVENT_MAX 30
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+#include "oplus_cam_kevent_fb.h"
+#endif
+#define CAM_REQ_MGR_EVENT_MAX 60
 
 static struct cam_req_mgr_device g_dev;
 struct kmem_cache *g_cam_req_mgr_timer_cachep;
@@ -979,6 +981,9 @@ struct platform_driver cam_req_mgr_driver = {
 
 int cam_req_mgr_init(void)
 {
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	cam_event_proc_init();
+#endif
 	return platform_driver_register(&cam_req_mgr_driver);
 }
 EXPORT_SYMBOL(cam_req_mgr_init);
@@ -986,6 +991,9 @@ EXPORT_SYMBOL(cam_req_mgr_init);
 void cam_req_mgr_exit(void)
 {
 	platform_driver_unregister(&cam_req_mgr_driver);
+#ifdef OPLUS_FEATURE_CAMERA_COMMON
+	cam_event_proc_exit();
+#endif
 }
 
 MODULE_DESCRIPTION("Camera Request Manager");

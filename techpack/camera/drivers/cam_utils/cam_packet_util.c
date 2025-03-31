@@ -42,7 +42,6 @@ int cam_packet_util_get_cmd_mem_addr(int handle, uint32_t **buf_addr,
 
 int cam_packet_util_validate_cmd_desc(struct cam_cmd_buf_desc *cmd_desc)
 {
-
 	if (!cmd_desc) {
 		CAM_ERR(CAM_UTIL, "Invalid cmd desc");
 		return -EINVAL;

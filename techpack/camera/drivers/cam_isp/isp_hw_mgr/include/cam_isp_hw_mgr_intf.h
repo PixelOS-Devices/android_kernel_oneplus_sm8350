@@ -241,7 +241,9 @@ enum cam_isp_hw_mgr_command {
 	CAM_ISP_HW_MGR_CMD_CTX_TYPE,
 	CAM_ISP_HW_MGR_GET_PACKET_OPCODE,
 	CAM_ISP_HW_MGR_GET_LAST_CDM_DONE,
+	CAM_ISP_HW_MGR_GET_ANCHOR_CONFIG,
 	CAM_ISP_HW_MGR_CMD_UPDATE_CLOCK,
+	CAM_ISP_HW_MGR_CMD_TRIGGER_CONTROL,
 	CAM_ISP_HW_MGR_CMD_MAX,
 };
 
@@ -258,18 +260,22 @@ enum cam_isp_ctx_type {
  * @cmd_type:              HW command type
  * @cmd_data:              Command data
  * @sof_irq_enable:        To debug if SOF irq is enabled
+ * @is_anchor_instance:    Indicate whether it is anchor instance
  * @ctx_type:              RDI_ONLY, PIX and RDI, or FS2
  * @packet_op_code:        Packet opcode
  * @last_cdm_done:         Last cdm done request
+ * @trigger_control:       Trigger control
  */
 struct cam_isp_hw_cmd_args {
 	uint32_t                          cmd_type;
 	void                             *cmd_data;
 	union {
+		bool                          is_anchor_instance;
 		uint32_t                      sof_irq_enable;
 		uint32_t                      ctx_type;
 		uint32_t                      packet_op_code;
 		uint64_t                      last_cdm_done;
+		bool                          trigger_control;
 	} u;
 };
 
