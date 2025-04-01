@@ -295,7 +295,7 @@ static void sia8152_check_trimming(
 {
 	int i = 0;
 	const uint32_t reg_num = ARRAY_SIZE(trimming_regs);
-	uint8_t vals[reg_num] = {0};
+	uint8_t vals[1024] = {0};
 	uint8_t crc = 0;
 
 	if (0 == sia8152s_check_chip_id(regmap))
@@ -339,4 +339,3 @@ const struct sia81xx_opt_if sia8152_opt_if = {
 	.set_pvdd_limit = sia8152_set_pvdd_limit,
 	.check_trimming = sia8152_check_trimming,
 };
-
