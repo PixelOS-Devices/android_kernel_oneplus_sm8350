@@ -15,7 +15,6 @@
 #ifdef OPLUS_FEATURE_CAMERA_COMMON
 #include "tof8801_driver.h"
 #include "oplus_cam_sensor_core.h"
-#include "oplus_cam_kevent_fb.h"
 #endif
 
 static int cam_sensor_update_req_mgr(
@@ -791,7 +790,6 @@ int32_t cam_sensor_driver_cmd(struct cam_sensor_ctrl_t *s_ctrl,
 #ifdef OPLUS_FEATURE_CAMERA_COMMON
 	int ret = 0;
 	int rc_power_down = 0;
-	char fb_payload[PAYLOAD_LENGTH] = {0};
 #endif
 	if (!s_ctrl || !arg) {
 		CAM_ERR(CAM_SENSOR, "s_ctrl is NULL");
@@ -890,7 +888,6 @@ int32_t cam_sensor_driver_cmd(struct cam_sensor_ctrl_t *s_ctrl,
 					CAM_ERR(CAM_SENSOR, "sensor power down faild!");
 					msleep(20);
 					mutex_unlock(&(s_ctrl->sensor_power_state_mutex));
-					KEVENT_FB_SNESOR_PROBE_FAILED(fb_payload, "sensor match failed", s_ctrl->sensordata->slave_info.sensor_id);
 					goto free_power_settings;
 				} else {
 					CAM_ERR(CAM_SENSOR, "sensor power down success sensor id 0x%x", s_ctrl->sensordata->slave_info.sensor_id);
@@ -904,7 +901,6 @@ int32_t cam_sensor_driver_cmd(struct cam_sensor_ctrl_t *s_ctrl,
 			}
 			mutex_unlock(&(s_ctrl->sensor_power_state_mutex));
 			msleep(20);
-			KEVENT_FB_SNESOR_PROBE_FAILED(fb_payload, "sensor match failed", s_ctrl->sensordata->slave_info.sensor_id);
 			goto free_power_settings;
 		}
 #else

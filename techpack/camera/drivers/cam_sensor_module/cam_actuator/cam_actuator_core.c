@@ -14,7 +14,6 @@
 
 #ifdef OPLUS_FEATURE_CAMERA_COMMON
 #include "oplus_cam_actuator_core.h"
-#include "oplus_cam_kevent_fb.h"
 #endif
 
 int32_t cam_actuator_construct_default_power_setting(
@@ -854,9 +853,6 @@ int32_t cam_actuator_driver_cmd(struct cam_actuator_ctrl_t *a_ctrl,
 	struct cam_control *cmd = (struct cam_control *)arg;
 	struct cam_actuator_soc_private *soc_private = NULL;
 	struct cam_sensor_power_ctrl_t  *power_info = NULL;
-#ifdef OPLUS_FEATURE_CAMERA_COMMON
-	char fb_payload[PAYLOAD_LENGTH] = {0};
-#endif
 	if (!a_ctrl || !cmd) {
 		CAM_ERR(CAM_ACTUATOR, "Invalid Args");
 		return -EINVAL;
@@ -1082,12 +1078,6 @@ int32_t cam_actuator_driver_cmd(struct cam_actuator_ctrl_t *a_ctrl,
 
 release_mutex:
 	mutex_unlock(&(a_ctrl->actuator_mutex));
-
-#ifdef OPLUS_FEATURE_CAMERA_COMMON
-	if (rc < 0) {
-		KEVENT_FB_ACTUATOR_CTL_FAILED(fb_payload, "actuator control error", rc);
-	}
-#endif
 	return rc;
 }
 
