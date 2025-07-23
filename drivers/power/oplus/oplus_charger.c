@@ -250,11 +250,6 @@ bool __attribute__((weak)) oplus_is_ptcrb_version(void)
 	return false;
 }
 
-void __attribute__((weak)) oplus_set_otg_switch_status(bool value)
-{
-        return;
-}
-
 /****************************************/
 #define RESET_MCU_DELAY_30S 6
 static int reset_mcu_delay = 0;
@@ -8637,7 +8632,6 @@ static void oplus_chg_variables_init(struct oplus_chg_chip *chip)
 	chip->charging_current = 0;
 	chip->read_by_reg = 0;
 	chip->pre_chg_up_limit_mmi_val = 0;
-	oplus_set_otg_switch_status(true);
 }
 
 static void oplus_chg_fail_action(struct oplus_chg_chip *chip)
