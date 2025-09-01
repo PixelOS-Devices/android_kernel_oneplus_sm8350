@@ -26,6 +26,7 @@
 		reg = <0x28>;
 		qcom,sn-irq = <&tlmm 41 0x00>;
 		qcom,sn-ven = <&tlmm 40 0x00>;
+		qcom,sn-firm = <&tlmm 38 0x00>;
 		qcom,sn-clkreq = <&tlmm 39 0x00>;
 		interrupt-parent = <&tlmm>;
 		interrupts = <41 0>;
