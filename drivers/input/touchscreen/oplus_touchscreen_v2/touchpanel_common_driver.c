@@ -513,7 +513,6 @@ static inline void tp_touch_down(struct touchpanel_data *ts, struct point_info p
 	}
 	if (ts->last_x_y_point[id].x != points.x || ts->last_x_y_point[id].y != points.y) {
 		cost_time = ktime_to_us(ktime_get()) - ktime_to_us(ts->monitor_data.irq_to_report_timer);
-		input_report_abs(ts->input_dev, ABS_TOUCH_COST_TIME_KERNEL, (cost_time < MAX_TOUCH_COST_TIME) ? cost_time : MAX_TOUCH_COST_TIME);
 	}
 	ts->last_x_y_point[id].x = points.x;
 	ts->last_x_y_point[id].y = points.y;
